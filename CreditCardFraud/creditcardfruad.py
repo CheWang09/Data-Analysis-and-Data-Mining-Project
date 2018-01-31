@@ -254,7 +254,105 @@ Ploting ROC curve about above values.
 """
 Following is about SVM and Descion Tree 
 """
-       
+
+from sklearn.svm import SVC
+
+model_svm = SVC()
+model_svm.fit(X_train_undersample, y_train_undersample)
+
+print(model_svm.estimator)
+
+from sklearn.metrics import confusion_matrix, classification_report
+
+SVM_pred = model_svm.predict(X_test)
+SVM_pred.head()
+pd.DataFrame(SVM_pred)[0].value_counts()
+
+print(confusion_matrix(y_test, SVM_pred))
+print(classification_report(y_test, SVM_pred))
+
+# >>> print(classification_report(y_test, SVM_pred))
+#             precision    recall  f1-score   support
+
+#           0       1.00      0.95      0.97     85299
+#           1       0.03      0.92      0.05       144
+
+# avg / total       1.00      0.95      0.97     85443
+
+## from the confusion_matrix and classification_report, the accuracy is not bad
+
+
+#################-------------------------------------------------##################
+"""
+This part I am going to find the most suitable parameter to improve data prediction accuracy
+like what C and gamma values to use
+"""
+SVM_param_grid = {'C': [0.1, 1, 10, 100, 1000], 'gamma': [1,0.1,0.01,0.001,0.0001], 'kernel': ['rbf']} 
+
+from sklearn.model_selection import GridSearchCV
+
+SVM_grid = GridSearchCV(SVC(),SVM_param_grid,refit=True,verbose=3)
+
+SVM_grid.fit(X_train_undersample,y_train_undersample)
+
+print(SVM_grid.best_params_)
+
+print(SVM_grid.best_estimator_)
+
+SVM_grid_predictions = SVM_grid.predict(X_test)
+
+print(pd.DataFrame(SVM_grid_predictions)[0].value_counts())
+y_test['Class'].value_counts()
+
+
+print(confusion_matrix(SVM_grid_predictions, y_test))
+print(classification_report(SVM_grid_predictions, y_test))
+
+##################---------------------------------------------##############################
+"""
+At this part , I am going to use Decision tree.
+"""
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+dree_model = DecisionTreeClassifier()
+
+dree_model.fit(X_train_undersample, y_train_undersample)
+
+dree_model_pred = dree_model.predict(X_test)
+
+print(confusion_matrix(y_test, dree_model_pred))
+print(classification_report(y_test, dree_model_pred))
+
+
+##################-------------------------------------------#################################
+"""
+Below is to visualize tree classifier and random forest
+"""
+from IPython.display import Image  
+from sklearn.externals.six import StringIO  
+from sklearn.tree import export_graphviz
+import pydot 
+# import graphviz
+# dot_data = export_graphviz(dree_model, out_file=None) 
+# graph = graphviz.Source(dot_data) 
+# graph.render("iris")
+features = list(X_train.columns[:])
+dot_data = StringIO()  
+export_graphviz(dree_model, out_file=dot_data,feature_names=features,filled=True,rounded=True)
+graph = pydot.graph_from_dot_data(dot_data.getvalue())  
+DT_image = Image(graph[0].create_png())
+display(DT_image)
+
+## Random Forest##
+
+from sklearn.ensemble import RandomForestClassifier
+rfc = RandomForestClassifier(n_estimators=100)
+rfc.fit(X_train_undersample, y_train_undersample)
+rfc_pred = rfc.predict(X_test)
+
+print(confusion_matrix(y_test,rfc_pred))
+print(classification_report(y_test,rfc_pred))
+
 
 
 
