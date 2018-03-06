@@ -179,7 +179,22 @@ print(recall_score(y_test, y_pred_whole))
 """
 plotting ROC curve
 """
+lr = LogisticRegression(C = best_c, penalty = 'l1')
+y_pred_undersample_score = lr.fit(X_train_undersample,y_train_undersample.values.ravel()).decision_function(X_test_undersample.values)
 
+fpr, tpr, thresholds = roc_curve(y_test_undersample.values.ravel(),y_pred_undersample_score)
+roc_auc = auc(fpr,tpr)
+
+# Plot ROC
+plt.title('Receiver Operating Characteristic')
+plt.plot(fpr, tpr, 'b',label='AUC = %0.2f'% roc_auc)
+plt.legend(loc='lower right')
+plt.plot([0,1],[0,1],'r--')
+plt.xlim([-0.1,1.0])
+plt.ylim([-0.1,1.01])
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.show()
 ##############------------------------------------------------------------------------######################
 
 
